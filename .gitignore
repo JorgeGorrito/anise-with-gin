@@ -1,0 +1,43 @@
+# Binarios y compilados
+*.exe
+*.out
+*.so
+*.dll
+*.dylib
+
+# Archivos del módulo y caché de dependencias
+/go.mod
+/go.sum
+/vendor/
+
+# Archivos de compilación de Go
+*.o
+*.a
+*.test
+
+# Carpetas generadas por `go build`
+/bin/
+/pkg/
+
+# Archivos de configuración del entorno
+**/.env*
+.env
+
+# Archivos de depuración
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+# Configuración de editores
+.vscode/
+.idea/
+*.iml
+*.sublime-workspace
+*.sublime-project
+
+# Archivos de pruebas
+cover.out
+
+# package main
+**/main.go
