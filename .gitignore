@@ -6,8 +6,6 @@
 *.dylib
 
 # Archivos del módulo y caché de dependencias
-/go.mod
-/go.sum
 /vendor/
 
 # Archivos de compilación de Go
