@@ -50,6 +50,10 @@ func NewWebApplication(
 	}
 }
 
+func (app *WebApplication) ConfigureApplication() error {
+	return app.configManager.ConfigureApplication()
+}
+
 func (app *WebApplication) configureEngine() error {
 	return app.configManager.ConfigureEngine(app.engine)
 }
@@ -66,6 +70,10 @@ func (app *WebApplication) Run(addr ...string) {
 	var errorList error
 
 	if err := app.registerDependencies(); err != nil {
+		errorList = errors.Join(errorList, err)
+	}
+
+	if err := app.ConfigureApplication(); err != nil {
 		errorList = errors.Join(errorList, err)
 	}
 
