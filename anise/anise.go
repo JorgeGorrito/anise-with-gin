@@ -3,6 +3,7 @@ package anise
 import (
 	"errors"
 
+	"github.com/JorgeGorrito/anise-with-gin/anise/commands"
 	"github.com/JorgeGorrito/anise-with-gin/anise/config"
 	"github.com/JorgeGorrito/anise-with-gin/anise/dependencies"
 	ea "github.com/JorgeGorrito/anise-with-gin/anise/errors"
@@ -16,6 +17,9 @@ type WebApplication struct {
 	routesManager         routing.Manager
 	dependenciesManager   dependencies.Manager
 	dependenciesContainer *dependencies.Container
+	commandsManager       commands.Manager
+	commandsFactory       *commands.Factory
+	commandsListener      commands.Listener
 }
 
 func NewWebApplication(
@@ -23,6 +27,7 @@ func NewWebApplication(
 	configManager config.Manager,
 	routesManager routing.Manager,
 	dependenciesManager dependencies.Manager,
+	commandsManager commands.Manager,
 ) *WebApplication {
 	var errorList error
 	if engine == nil {
@@ -41,12 +46,23 @@ func NewWebApplication(
 	if errorList != nil {
 		panic(errorList)
 	}
+
+	var commandsFactory *commands.Factory = nil
+	var commandsListener commands.Listener = nil
+	if commandsManager != nil {
+		commandsFactory = commands.NewFactory()
+		commandsListener = commands.NewDefaultListener(commandsFactory)
+	}
+
 	return &WebApplication{
 		engine:                engine,
 		configManager:         configManager,
 		routesManager:         routesManager,
 		dependenciesManager:   dependenciesManager,
+		commandsManager:       commandsManager,
+		commandsFactory:       commandsFactory,
 		dependenciesContainer: dependencies.NewContainer(),
+		commandsListener:      commandsListener,
 	}
 }
 
@@ -64,6 +80,10 @@ func (app *WebApplication) registerDependencies() error {
 
 func (app *WebApplication) registerRoutes() error {
 	return app.routesManager.RegisterRoutes(app.engine, app.dependenciesContainer)
+}
+
+func (app *WebApplication) RegisterCommands() error {
+	return app.commandsManager.RegisterCommands(app.commandsFactory)
 }
 
 func (app *WebApplication) Run(addr ...string) {
@@ -85,9 +105,19 @@ func (app *WebApplication) Run(addr ...string) {
 		errorList = errors.Join(errorList, err)
 	}
 
+	if app.commandsManager != nil {
+		if err := app.RegisterCommands(); err != nil {
+			errorList = errors.Join(errorList, err)
+		} else {
+			go app.commandsListener.Listen(commands.DEFAULT_COMMAND_LISTENER_PORT)
+		}
+	}
+
 	if err := app.engine.Run(addr...); err != nil {
 		errorList = errors.Join(errorList, err)
 	}
 
-	panic(errorList)
+	if errorList != nil {
+		panic(errorList)
+	}
 }
