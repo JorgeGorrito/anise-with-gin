@@ -1,5 +1,5 @@
 package commands
 
 type Registry interface {
-	Register(name string, command Command)
+	Register(name string, construct NewCommand)
 }

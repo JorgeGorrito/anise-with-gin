@@ -1,6 +1,6 @@
 package commands
 
 type CommandRequest struct {
-	Name   string
-	Params map[string]string
+	Name   string            `json:"name"`
+	Params map[string]string `json:"params"`
 }

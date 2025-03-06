@@ -1,5 +1,5 @@
 package commands
 
 type Retriever interface {
-	GetByName(name string) Command
+	GetByName(name string) NewCommand
 }
