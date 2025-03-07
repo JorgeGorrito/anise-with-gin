@@ -77,13 +77,13 @@ func (s *DefaultSender) Send() {
 
 		switch message.Type {
 		case SUCCESS_MESSAGE:
-			fmt.Printf("[Anise-Commands] Success: %s\n", commandRequest.Name)
+			fmt.Printf("[Anise-Commands] Success> %s\n", commandRequest.Name)
 			return
 		case FAIL_MESSAGE:
-			fmt.Printf("[Anise-Commands] Fail %s: %s\n", commandRequest.Name, string(message.Data))
+			fmt.Printf("[Anise-Commands] Fail %s> %s\n", commandRequest.Name, string(message.Data))
 			return
 		case PRINT_MESSAGE:
-			fmt.Printf("[Anise-Commands] %s: %s\n", commandRequest.Name, string(message.Data))
+			fmt.Printf("[Anise-Commands] %s> %s\n", commandRequest.Name, string(message.Data))
 		default:
 			continue
 		}
