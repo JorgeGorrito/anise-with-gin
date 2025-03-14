@@ -1,9 +1,8 @@
-package utils
+package dependencies
 
 import (
 	"reflect"
 
-	"github.com/JorgeGorrito/anise-with-gin/anise/dependencies"
 	"github.com/JorgeGorrito/anise-with-gin/anise/dependencies/errors"
 	"github.com/JorgeGorrito/anise-with-gin/anise/dependencies/types"
 )
@@ -16,6 +15,6 @@ func GetAbstractType[T any]() types.Abstract {
 	return abstractType
 }
 
-func Inject[T any](dependencyResolver dependencies.Resolver) T {
+func Inject[T any](dependencyResolver Resolver) T {
 	return dependencyResolver.Resolve(GetAbstractType[T]()).(T)
 }

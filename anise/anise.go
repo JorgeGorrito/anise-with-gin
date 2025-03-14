@@ -54,6 +54,9 @@ func NewWebApplication(
 		commandsListener = commands.NewDefaultListener(commandsFactory)
 	}
 
+	var dependenciesContainer *dependencies.Container = dependencies.NewContainer()
+	dependenciesManager.SetResolver(dependenciesContainer)
+
 	return &WebApplication{
 		engine:                engine,
 		configManager:         configManager,
@@ -61,7 +64,7 @@ func NewWebApplication(
 		dependenciesManager:   dependenciesManager,
 		commandsManager:       commandsManager,
 		commandsFactory:       commandsFactory,
-		dependenciesContainer: dependencies.NewContainer(),
+		dependenciesContainer: dependenciesContainer,
 		commandsListener:      commandsListener,
 	}
 }
