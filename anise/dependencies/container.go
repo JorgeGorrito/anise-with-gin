@@ -1,35 +1,31 @@
 package dependencies
 
 import (
-	"reflect"
-
 	"github.com/JorgeGorrito/anise-with-gin/anise/dependencies/errors"
 	"github.com/JorgeGorrito/anise-with-gin/anise/dependencies/types"
 )
 
 type Container struct {
-	registry map[types.Abstract]types.Concrete
+	registry map[types.Abstract]types.GetConcreteFunc
 }
 
 func NewContainer() *Container {
 	return &Container{
-		registry: make(map[types.Abstract]types.Concrete),
+		registry: make(map[types.Abstract]types.GetConcreteFunc),
 	}
 }
 
-func (c *Container) Bind(abstract types.Abstract, concrete types.Concrete) {
-	concreteType := reflect.TypeOf(concrete)
-	if concreteType.Kind() != reflect.Ptr {
-		panic(errors.ErrConcreteImplementIsntPoint)
+func (c *Container) Bind(abstract types.Abstract, getConcreteFunc types.GetConcreteFunc) {
+	if _, ok := c.registry[abstract]; ok {
+		panic(errors.NewErrTypeAlreadyRegistered(abstract.String()))
 	}
-
-	c.registry[abstract] = concrete
+	c.registry[abstract] = getConcreteFunc
 }
 
 func (c *Container) Resolve(abstract types.Abstract) types.Concrete {
-	concrete, ok := c.registry[abstract]
+	getConcreteFunc, ok := c.registry[abstract]
 	if !ok {
-		panic(errors.NewErrTypeNotRegisterInDependencyProvider(abstract.String()))
+		panic(errors.NewErrTypeNotRegister(abstract.String()))
 	}
-	return concrete
+	return getConcreteFunc()
 }
