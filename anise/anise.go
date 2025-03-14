@@ -89,11 +89,11 @@ func (app *WebApplication) RegisterCommands() error {
 func (app *WebApplication) Run(addr ...string) {
 	var errorList error
 
-	if err := app.registerDependencies(); err != nil {
+	if err := app.ConfigureApplication(); err != nil {
 		errorList = errors.Join(errorList, err)
 	}
 
-	if err := app.ConfigureApplication(); err != nil {
+	if err := app.registerDependencies(); err != nil {
 		errorList = errors.Join(errorList, err)
 	}
 
