@@ -1,10 +1,11 @@
 module github.com/JorgeGorrito/anise-with-gin
 
-go 1.23
+go 1.23.5
 
 require github.com/gin-gonic/gin v1.10.0
 
 require (
+	github.com/JorgeGorrito/anise-dependency-injection v0.1.0-alpha.1 // indirect
 	github.com/bytedance/sonic v1.12.8 // indirect
 	github.com/bytedance/sonic/loader v0.2.3 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect

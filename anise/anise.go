@@ -3,23 +3,22 @@ package anise
 import (
 	"errors"
 
+	dependencies "github.com/JorgeGorrito/anise-dependency-injection/andi/port/in"
 	"github.com/JorgeGorrito/anise-with-gin/anise/commands"
 	"github.com/JorgeGorrito/anise-with-gin/anise/config"
-	"github.com/JorgeGorrito/anise-with-gin/anise/dependencies"
 	ea "github.com/JorgeGorrito/anise-with-gin/anise/errors"
 	"github.com/JorgeGorrito/anise-with-gin/anise/routing"
 	"github.com/gin-gonic/gin"
 )
 
 type WebApplication struct {
-	engine                *gin.Engine
-	configManager         config.Manager
-	routesManager         routing.Manager
-	dependenciesManager   dependencies.Manager
-	dependenciesContainer *dependencies.Container
-	commandsManager       commands.Manager
-	commandsFactory       *commands.Factory
-	commandsListener      commands.Listener
+	engine              *gin.Engine
+	configManager       config.Manager
+	routesManager       routing.Manager
+	dependenciesManager dependencies.Manager
+	commandsManager     commands.Manager
+	commandsFactory     *commands.Factory
+	commandsListener    commands.Listener
 }
 
 func NewWebApplication(
@@ -53,19 +52,14 @@ func NewWebApplication(
 		commandsFactory = commands.NewFactory()
 		commandsListener = commands.NewDefaultListener(commandsFactory)
 	}
-
-	var dependenciesContainer *dependencies.Container = dependencies.NewContainer()
-	dependenciesManager.SetResolver(dependenciesContainer)
-
 	return &WebApplication{
-		engine:                engine,
-		configManager:         configManager,
-		routesManager:         routesManager,
-		dependenciesManager:   dependenciesManager,
-		commandsManager:       commandsManager,
-		commandsFactory:       commandsFactory,
-		dependenciesContainer: dependenciesContainer,
-		commandsListener:      commandsListener,
+		engine:              engine,
+		configManager:       configManager,
+		routesManager:       routesManager,
+		dependenciesManager: dependenciesManager,
+		commandsManager:     commandsManager,
+		commandsFactory:     commandsFactory,
+		commandsListener:    commandsListener,
 	}
 }
 
@@ -78,11 +72,11 @@ func (app *WebApplication) configureEngine() error {
 }
 
 func (app *WebApplication) registerDependencies() error {
-	return app.dependenciesManager.RegisterDependencies(app.dependenciesContainer)
+	return app.dependenciesManager.RegisterDependencies()
 }
 
 func (app *WebApplication) registerRoutes() error {
-	return app.routesManager.RegisterRoutes(app.engine, app.dependenciesContainer)
+	return app.routesManager.RegisterRoutes(app.engine)
 }
 
 func (app *WebApplication) RegisterCommands() error {
