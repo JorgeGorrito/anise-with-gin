@@ -1,4 +1,4 @@
-package commands
+package command
 
 type CommandRequest struct {
 	Name   string            `json:"name"`

@@ -1,4 +1,4 @@
-package commands
+package command
 
 type CMDPrinter interface {
 	Print(a ...any)

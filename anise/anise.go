@@ -3,8 +3,7 @@ package anise
 import (
 	"errors"
 
-	dependencies "github.com/JorgeGorrito/anise-dependency-injection/andi/port/in"
-	"github.com/JorgeGorrito/anise-with-gin/anise/commands"
+	"github.com/JorgeGorrito/anise-with-gin/anise/command"
 	"github.com/JorgeGorrito/anise-with-gin/anise/config"
 	ea "github.com/JorgeGorrito/anise-with-gin/anise/errors"
 	"github.com/JorgeGorrito/anise-with-gin/anise/routing"
@@ -12,21 +11,19 @@ import (
 )
 
 type WebApplication struct {
-	engine              *gin.Engine
-	configManager       config.Manager
-	routesManager       routing.Manager
-	dependenciesManager dependencies.Manager
-	commandsManager     commands.Manager
-	commandsFactory     *commands.Factory
-	commandsListener    commands.Listener
+	engine           *gin.Engine
+	configManager    config.Manager
+	routesManager    routing.Manager
+	commandsManager  command.Manager
+	commandsFactory  *command.Factory
+	commandsListener command.Listener
 }
 
 func NewWebApplication(
 	engine *gin.Engine,
 	configManager config.Manager,
 	routesManager routing.Manager,
-	dependenciesManager dependencies.Manager,
-	commandsManager commands.Manager,
+	commandsManager command.Manager,
 ) *WebApplication {
 	var errorList error
 	if engine == nil {
@@ -38,28 +35,24 @@ func NewWebApplication(
 	if routesManager == nil {
 		errorList = errors.Join(errorList, ea.ErrRoutesManagerIsNil)
 	}
-	if dependenciesManager == nil {
-		errorList = errors.Join(errorList, ea.ErrDependenciesManagerIsNil)
-	}
 
 	if errorList != nil {
 		panic(errorList)
 	}
 
-	var commandsFactory *commands.Factory = nil
-	var commandsListener commands.Listener = nil
+	var commandsFactory *command.Factory = nil
+	var commandsListener command.Listener = nil
 	if commandsManager != nil {
-		commandsFactory = commands.NewFactory()
-		commandsListener = commands.NewDefaultListener(commandsFactory)
+		commandsFactory = command.NewFactory()
+		commandsListener = command.NewDefaultListener(commandsFactory)
 	}
 	return &WebApplication{
-		engine:              engine,
-		configManager:       configManager,
-		routesManager:       routesManager,
-		dependenciesManager: dependenciesManager,
-		commandsManager:     commandsManager,
-		commandsFactory:     commandsFactory,
-		commandsListener:    commandsListener,
+		engine:           engine,
+		configManager:    configManager,
+		routesManager:    routesManager,
+		commandsManager:  commandsManager,
+		commandsFactory:  commandsFactory,
+		commandsListener: commandsListener,
 	}
 }
 
@@ -69,10 +62,6 @@ func (app *WebApplication) ConfigureApplication() error {
 
 func (app *WebApplication) configureEngine() error {
 	return app.configManager.ConfigureEngine(app.engine)
-}
-
-func (app *WebApplication) registerDependencies() error {
-	return app.dependenciesManager.RegisterDependencies()
 }
 
 func (app *WebApplication) registerRoutes() error {
@@ -90,10 +79,6 @@ func (app *WebApplication) Run(addr ...string) {
 		errorList = errors.Join(errorList, err)
 	}
 
-	if err := app.registerDependencies(); err != nil {
-		errorList = errors.Join(errorList, err)
-	}
-
 	if err := app.configureEngine(); err != nil {
 		errorList = errors.Join(errorList, err)
 	}
@@ -106,7 +91,7 @@ func (app *WebApplication) Run(addr ...string) {
 		if err := app.RegisterCommands(); err != nil {
 			errorList = errors.Join(errorList, err)
 		} else {
-			go app.commandsListener.Listen(commands.DEFAULT_COMMAND_LISTENER_PORT)
+			go app.commandsListener.Listen(command.DEFAULT_COMMAND_LISTENER_PORT)
 		}
 	}
 
