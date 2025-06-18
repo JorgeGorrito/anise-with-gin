@@ -15,7 +15,7 @@ type WebApplication struct {
 	configManager    config.Manager
 	routesManager    routing.Manager
 	commandsManager  command.Manager
-	commandsFactory  *command.Factory
+	commandsFactory  command.Factory
 	commandsListener command.Listener
 }
 
@@ -24,6 +24,7 @@ func NewWebApplication(
 	configManager config.Manager,
 	routesManager routing.Manager,
 	commandsManager command.Manager,
+	commandsFactory command.Factory,
 ) *WebApplication {
 	var errorList error
 	if engine == nil {
@@ -40,10 +41,11 @@ func NewWebApplication(
 		panic(errorList)
 	}
 
-	var commandsFactory *command.Factory = nil
 	var commandsListener command.Listener = nil
 	if commandsManager != nil {
-		commandsFactory = command.NewFactory()
+		if commandsFactory == nil {
+			commandsFactory = command.NewFactory()
+		}
 		commandsListener = command.NewDefaultListener(commandsFactory)
 	}
 	return &WebApplication{
