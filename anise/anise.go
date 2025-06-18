@@ -79,20 +79,20 @@ func (app *WebApplication) Run(addr ...string) {
 		errorList = errors.Join(errorList, err)
 	}
 
-	if err := app.configureEngine(); err != nil {
-		errorList = errors.Join(errorList, err)
-	}
-
-	if err := app.registerRoutes(); err != nil {
-		errorList = errors.Join(errorList, err)
-	}
-
 	if app.commandsManager != nil {
 		if err := app.RegisterCommands(); err != nil {
 			errorList = errors.Join(errorList, err)
 		} else {
 			go app.commandsListener.Listen(command.DEFAULT_COMMAND_LISTENER_PORT)
 		}
+	}
+
+	if err := app.configureEngine(); err != nil {
+		errorList = errors.Join(errorList, err)
+	}
+
+	if err := app.registerRoutes(); err != nil {
+		errorList = errors.Join(errorList, err)
 	}
 
 	if err := app.engine.Run(addr...); err != nil {
