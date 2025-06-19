@@ -15,47 +15,31 @@ type WebApplication struct {
 	configManager    config.Manager
 	routesManager    routing.Manager
 	commandsManager  command.Manager
-	commandsFactory  command.Factory
 	commandsListener command.Listener
 }
 
-func NewWebApplication(
-	engine *gin.Engine,
-	configManager config.Manager,
-	routesManager routing.Manager,
-	commandsManager command.Manager,
-	commandsFactory command.Factory,
-) *WebApplication {
-	var errorList error
-	if engine == nil {
-		errorList = errors.Join(errorList, ea.ErrEngineIsNil)
-	}
-	if configManager == nil {
-		errorList = errors.Join(errorList, ea.ErrConfigManagerIsNil)
-	}
-	if routesManager == nil {
-		errorList = errors.Join(errorList, ea.ErrRoutesManagerIsNil)
-	}
+func NewWebApplication() *WebApplication {
+	return &WebApplication{}
+}
 
-	if errorList != nil {
-		panic(errorList)
-	}
+func (app *WebApplication) SetEngine(engine *gin.Engine) *WebApplication {
+	app.engine = engine
+	return app
+}
 
-	var commandsListener command.Listener = nil
-	if commandsManager != nil {
-		if commandsFactory == nil {
-			commandsFactory = command.NewFactory()
-		}
-		commandsListener = command.NewDefaultListener(commandsFactory)
-	}
-	return &WebApplication{
-		engine:           engine,
-		configManager:    configManager,
-		routesManager:    routesManager,
-		commandsManager:  commandsManager,
-		commandsFactory:  commandsFactory,
-		commandsListener: commandsListener,
-	}
+func (app *WebApplication) SetConfigManager(configManager config.Manager) *WebApplication {
+	app.configManager = configManager
+	return app
+}
+
+func (app *WebApplication) SetRoutesManager(routesManager routing.Manager) *WebApplication {
+	app.routesManager = routesManager
+	return app
+}
+
+func (app *WebApplication) SetCommandsManager(commandsManager command.Manager) *WebApplication {
+	app.commandsManager = commandsManager
+	return app
 }
 
 func (app *WebApplication) ConfigureApplication() error {
@@ -71,11 +55,29 @@ func (app *WebApplication) registerRoutes() error {
 }
 
 func (app *WebApplication) RegisterCommands() error {
-	return app.commandsManager.RegisterCommands(app.commandsFactory)
+	return app.commandsManager.RegisterCommands(app.commandsManager.GetRegistryCommand())
 }
 
 func (app *WebApplication) Run(addr ...string) {
 	var errorList error
+
+	if app.engine == nil {
+		errorList = errors.Join(errorList, ea.ErrEngineIsNil)
+	}
+	if app.configManager == nil {
+		errorList = errors.Join(errorList, ea.ErrConfigManagerIsNil)
+	}
+	if app.routesManager == nil {
+		errorList = errors.Join(errorList, ea.ErrRoutesManagerIsNil)
+	}
+
+	if errorList != nil {
+		panic(errorList)
+	}
+
+	if app.commandsManager != nil {
+		app.commandsListener = command.NewDefaultListener(app.commandsManager.GetRetrieverCommand())
+	}
 
 	if err := app.ConfigureApplication(); err != nil {
 		errorList = errors.Join(errorList, err)
