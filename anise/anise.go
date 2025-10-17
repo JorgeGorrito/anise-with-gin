@@ -107,3 +107,53 @@ func (app *WebApplication) Run(addr ...string) {
 		panic(errorList)
 	}
 }
+
+func (app *WebApplication) RunTLS(addr, certFile, keyFile string) {
+	var errorList error
+
+	if app.engine == nil {
+		errorList = errors.Join(errorList, ea.ErrEngineIsNil)
+	}
+	if app.configManager == nil {
+		errorList = errors.Join(errorList, ea.ErrConfigManagerIsNil)
+	}
+	if app.routesManager == nil {
+		errorList = errors.Join(errorList, ea.ErrRoutesManagerIsNil)
+	}
+
+	if errorList != nil {
+		panic(errorList)
+	}
+
+	if app.commandsManager != nil {
+		app.commandsListener = command.NewDefaultListener(app.commandsManager.GetRetrieverCommand())
+	}
+
+	if err := app.ConfigureApplication(); err != nil {
+		errorList = errors.Join(errorList, err)
+	}
+
+	if app.commandsManager != nil {
+		if err := app.RegisterCommands(); err != nil {
+			errorList = errors.Join(errorList, err)
+		} else {
+			go app.commandsListener.Listen(command.DEFAULT_COMMAND_LISTENER_PORT)
+		}
+	}
+
+	if err := app.configureEngine(); err != nil {
+		errorList = errors.Join(errorList, err)
+	}
+
+	if err := app.registerRoutes(); err != nil {
+		errorList = errors.Join(errorList, err)
+	}
+
+	if err := app.engine.RunTLS(addr, certFile, keyFile); err != nil {
+		errorList = errors.Join(errorList, err)
+	}
+
+	if errorList != nil {
+		panic(errorList)
+	}
+}
